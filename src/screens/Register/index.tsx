@@ -2,21 +2,20 @@ import UIInput from "@components/ui/Input";
 import UIButton from "@components/ui/UIButton";
 import UIText from "@components/ui/UIText";
 import useColors from "@hooks/hook.color";
-import { LoginPayload } from "@models/model.auth";
+import { RegisterPayload } from "@models/model.auth";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootParamList } from "@screens/root";
-import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
 
 type Props = NativeStackScreenProps<RootParamList, "RegisterScreen">;
 
-const Login = ({ navigation }: Props) => {
+const Register = ({ navigation }: Props) => {
   const colors = useColors();
-  const { control, handleSubmit } = useForm<LoginPayload>();
-  const onSubmit = useCallback((data: LoginPayload) => {
+  const { control, handleSubmit } = useForm<RegisterPayload>();
+  const onSubmit = (data: RegisterPayload) => {
     console.log("hola", data);
-  }, []);
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={[styles.form, { backgroundColor: colors.secondary }]}>
@@ -25,6 +24,21 @@ const Login = ({ navigation }: Props) => {
           style={styles.logo}
         />
         <View style={styles.inputContainer}>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field }) => (
+              <UIInput
+                placeholder="Name"
+                autoCapitalize="none"
+                placeholderTextColor={colors.grey}
+                styleInput={[styles.input, { borderColor: colors.grey }]}
+                onChangeText={field.onChange}
+                value={field.value}
+                {...field}
+              />
+            )}
+          />
           <Controller
             control={control}
             name="email"
@@ -69,9 +83,9 @@ const Login = ({ navigation }: Props) => {
         <UIText
           color={colors.primary}
           style={styles.text}
-          onPress={() => navigation.navigate("RegisterScreen")}
+          onPress={() => navigation.navigate("LoginScreen")}
         >
-          Registrate
+          Login
         </UIText>
       </View>
     </ScrollView>
@@ -118,4 +132,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
+export default Register;

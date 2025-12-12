@@ -1,4 +1,6 @@
 import {
+  KeyboardAvoidingView,
+  Platform,
   StyleProp,
   StyleSheet,
   Text,
@@ -16,12 +18,15 @@ type Props = TextInputProps & {
 
 const UIInput = ({ label, styleInput, styleContainer, ...props }: Props) => {
   return (
-    <View style={styleContainer}>
+    <KeyboardAvoidingView
+      style={styleContainer}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       {!!label && <Text style={styles.text}>{label}</Text>}
       <View style={[styleInput]}>
         <TextInput {...props} />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

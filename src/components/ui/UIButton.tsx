@@ -28,7 +28,7 @@ const UIButton = ({
       onPress={onPress}
       style={[
         styles.button,
-        { backgroundColor: !!colorButton ? colorButton : "blue" },
+        { backgroundColor: !!colorButton ? colorButton : "" },
       ]}
       {...props}
     >

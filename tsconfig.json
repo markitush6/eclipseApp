@@ -8,7 +8,9 @@
       "@hooks/*": ["src/hooks/*"],
       "@assets/*": ["src/assets/*"],
       "@navigation/*": ["src/navigation/*"],
-      "@theme/*": ["src/theme/*"]
+      "@models/*": ["src/models/*"],
+      "@theme/*": ["src/theme/*"],
+      "@redux/*": ["src/redux/*"]
     }
   },
   "extends": "expo/tsconfig.base",

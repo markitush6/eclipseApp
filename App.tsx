@@ -1,11 +1,15 @@
+import { store } from "@redux/store";
 import Screens from "@screens/root";
 import { StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Provider } from "react-redux";
 
 const App = () => {
   return (
     <SafeAreaProvider>
-      <Screens />
+      <Provider store={store}>
+        <Screens />
+      </Provider>
     </SafeAreaProvider>
   );
 };

@@ -5,7 +5,7 @@ import useColors from "@hooks/hook.color";
 import { LoginPayload } from "@models/model.auth";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootParamList } from "@screens/root";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
 
@@ -13,6 +13,7 @@ type Props = NativeStackScreenProps<RootParamList, "RegisterScreen">;
 
 const Login = ({ navigation }: Props) => {
   const colors = useColors();
+  const [inputFocus, setInputFocus] = useState<number>(0);
   const { control, handleSubmit } = useForm<LoginPayload>();
   const onSubmit = useCallback((data: LoginPayload) => {
     console.log("hola", data);
@@ -32,11 +33,20 @@ const Login = ({ navigation }: Props) => {
               <UIInput
                 placeholder="Email"
                 autoCapitalize="none"
-                placeholderTextColor={colors.grey}
-                styleInput={[styles.input, { borderColor: colors.grey }]}
+                placeholderTextColor={
+                  inputFocus === 1 ? colors.primary : colors.grey
+                }
+                styleInput={[
+                  styles.input,
+                  {
+                    borderColor:
+                      inputFocus === 1 ? colors.primary : colors.grey,
+                  },
+                ]}
                 onChangeText={field.onChange}
+                onFocus={() => setInputFocus(1)}
+                onBlur={() => setInputFocus(0)}
                 value={field.value}
-                {...field}
               />
             )}
           />
@@ -48,11 +58,20 @@ const Login = ({ navigation }: Props) => {
                 placeholder="Password"
                 autoCapitalize="none"
                 secureTextEntry
-                placeholderTextColor={colors.grey}
-                styleInput={[styles.input, { borderColor: colors.grey }]}
+                placeholderTextColor={
+                  inputFocus === 2 ? colors.primary : colors.grey
+                }
+                onFocus={() => setInputFocus(2)}
+                onBlur={() => setInputFocus(0)}
+                styleInput={[
+                  styles.input,
+                  {
+                    borderColor:
+                      inputFocus === 2 ? colors.primary : colors.grey,
+                  },
+                ]}
                 onChangeText={field.onChange}
                 value={field.value}
-                {...field}
               />
             )}
           />

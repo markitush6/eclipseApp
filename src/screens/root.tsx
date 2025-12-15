@@ -6,6 +6,7 @@ import Login from "@screens/Login";
 import Details from "./Details";
 import Home from "./Home";
 import Register from "./Register";
+import SplashScreen from "./SplashScreen";
 // import Register from '@screen/Register';
 // import Home from '@screen/Home';
 // import Splash from '@screen/Splash';
@@ -27,7 +28,7 @@ const Screens = () => {
         id="RootNavigator"
         screenOptions={{ headerShown: false }}
       >
-        {/* <RootStack.Screen name="SplashScreen" component={Splash} /> */}
+        <RootStack.Screen name="SplashScreen" component={SplashScreen} />
         <RootStack.Screen name="LoginScreen" component={Login} />
         <RootStack.Screen name="HomeScreen" component={Home} />
         <RootStack.Screen name="DetailsScreen" component={Details} />

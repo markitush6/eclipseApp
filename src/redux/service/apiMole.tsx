@@ -2,10 +2,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const apiMole = createApi({
   reducerPath: "apiMole",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "https://rickandmortyapi.com/api/" }),
   endpoints: (builder) => ({
-    getMole: builder.query({
-      query: () => "",
+    getMole: builder.query<any, void>({
+      query: () => "character/?page=19",
     }),
   }),
 });

@@ -2,6 +2,7 @@ import Card from "@components/ui/card";
 import Header from "@components/ui/header";
 import useColors from "@hooks/hook.color";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useGetMoleQuery } from "@redux/service/apiMole";
 import { RootParamList } from "@screens/root";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,6 +13,8 @@ type Props = NativeStackScreenProps<RootParamList, "HomeScreen">;
 const Home = ({ navigation }: Props) => {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+
+  const { data } = useGetMoleQuery();
   return (
     <>
       <View
@@ -37,13 +40,13 @@ const Home = ({ navigation }: Props) => {
         <Text style={styles.text}>MIS LUNARES</Text>
         <Card
           title="Lunar 1"
-          image={require("@assets/images/lunar.jpeg")}
+          image={{ uri: data?.results[0].image }}
           style={{ marginVertical: 16 }}
           onPress={() =>
             navigation.navigate("DetailsScreen", {
               mole: {
                 name: "Lunar 1",
-                image: require("@assets/images/lunar.jpeg"),
+                image: { uri: data?.results[0].image },
                 description: "Lunar 1",
                 percentage: 10.5,
                 id: 1,

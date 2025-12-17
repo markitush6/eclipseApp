@@ -3,9 +3,16 @@ import Header from "@components/ui/header";
 import useColors from "@hooks/hook.color";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useGetMoleQuery } from "@redux/service/apiMole";
+import { useGetMolesQuery } from "@redux/service/apiMole";
 import { RootParamList } from "@screens/root";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/EvilIcons";
 
@@ -14,8 +21,19 @@ type Props = NativeStackScreenProps<RootParamList, "HomeScreen">;
 const Home = ({ navigation }: Props) => {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const [userId, setUser_id] = useState(0);
+  const { data } = useGetMolesQuery(userId);
+  useEffect(() => {
+    const dataUserId = async () => {
+      const user_id = await AsyncStorage.getItem("user_id");
+      if (user_id) {
+        setUser_id(parseInt(user_id));
+      }
+    };
+    dataUserId();
+  }, []);
+  console.log(data);
 
-  const { data } = useGetMoleQuery();
   return (
     <>
       <View
@@ -47,21 +65,27 @@ const Home = ({ navigation }: Props) => {
       </View>
       <View style={styles.container}>
         <Text style={styles.text}>MIS LUNARES</Text>
-        <Card
-          title="Lunar 1"
-          image={{ uri: data?.results[0].image }}
-          style={{ marginVertical: 16 }}
-          onPress={() =>
-            navigation.navigate("DetailsScreen", {
-              mole: {
-                name: "Lunar 1",
-                image: { uri: data?.results[0].image },
-                description: "Lunar 1",
-                percentage: 10.5,
-                id: 1,
-              },
-            })
-          }
+        <FlatList
+          data={data?.historial}
+          renderItem={({ item }) => (
+            <Card
+              title={item?.nombre}
+              image={{ uri: item?.imagen }}
+              style={{ marginVertical: 16 }}
+              onPress={() =>
+                navigation.navigate("DetailsScreen", {
+                  mole: {
+                    name: item?.nombre,
+                    image: { uri: item?.imagen },
+                    description: item?.descripcion,
+                    percentage: item?.probabilidad,
+                    id: item?.lunar_id,
+                    user_id: userId,
+                  },
+                })
+              }
+            />
+          )}
         />
       </View>
     </>

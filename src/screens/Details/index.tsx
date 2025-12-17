@@ -3,13 +3,28 @@ import UIInput from "@components/ui/Input";
 import UIButton from "@components/ui/UIButton";
 import UIText from "@components/ui/UIText";
 import useColors from "@hooks/hook.color";
+import { MoleModel } from "@models/models.mole";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  useGetMolesQuery,
+  usePostMoleIaMutation,
+  usePostMoleMutation,
+} from "@redux/service/apiMole";
 import { RootParamList } from "@screens/root";
 import { Asset } from "expo-asset";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
-import { Alert, Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Alert,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/EvilIcons";
 
@@ -21,7 +36,11 @@ const Details = ({ navigation, route }: Props) => {
   const [image, setImage] = useState();
   const mole = route.params?.mole;
   const asset = mole ? Asset.fromModule(mole?.image) : null;
-
+  const [postMoleIA] = usePostMoleIaMutation();
+  const [postMole] = usePostMoleMutation();
+  const { control, handleSubmit } = useForm<MoleModel>();
+  const [userId, setUser_id] = useState(0);
+  const { refetch } = useGetMolesQuery(userId);
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -47,6 +66,76 @@ const Details = ({ navigation, route }: Props) => {
     }
   };
 
+  const onSubmit = useCallback(
+    async (formMole: MoleModel) => {
+      console.log("Entra");
+
+      const formData = new FormData();
+      const fileName = `mole_${userId}_${Date.now()}.jpg`;
+      formData.append("name", formMole?.name ?? "");
+      formData.append("description", formMole?.description ?? "");
+      formData.append("image", {
+        uri: image,
+        type: "image/jpeg",
+        name: fileName,
+      });
+      formData.append("user_id", userId.toString());
+      if (!!image) {
+        console.log(">Entra 2");
+
+        const response = await postMoleIA(formData);
+        console.log(response);
+        await refetch();
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeScreen" }],
+        });
+      } else {
+        Alert.alert("Error", "No se selecciono una imagen");
+      }
+    },
+    [image, userId]
+  );
+  useEffect(() => {
+    const dataUserId = async () => {
+      const user_id = await AsyncStorage.getItem("user_id");
+      if (user_id) {
+        setUser_id(parseInt(user_id));
+      }
+    };
+    dataUserId();
+  }, []);
+  const onSubmitMole = useCallback(
+    async (formMole: MoleModel) => {
+      console.log("Entra", image, formMole);
+
+      const formData = new FormData();
+      const fileName = `mole_${userId}_${Date.now()}.jpg`;
+      formData.append("nom", formMole?.name ?? "");
+      formData.append("descripcio", formMole?.description ?? "");
+      formData.append("image", {
+        uri: image,
+        type: "image/jpeg",
+        name: fileName,
+      });
+      formData.append("user_id", userId.toString());
+      if (!!image) {
+        console.log(">Entra 2");
+
+        const response = await postMole(formData);
+        console.log(response);
+        await refetch();
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeScreen" }],
+        });
+      } else {
+        Alert.alert("Error", "No se selecciono una imagen");
+      }
+    },
+    [image, userId]
+  );
+
   return (
     <>
       <View
@@ -60,7 +149,7 @@ const Details = ({ navigation, route }: Props) => {
         <Header onPressBack={() => navigation.goBack()} title="Detalles" />
       </View>
 
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
           <View style={styles.imageContainer}>
             <Image
@@ -102,7 +191,7 @@ const Details = ({ navigation, route }: Props) => {
                       mole?.percentage < 50 ? colors.primary : colors.danger
                     }
                   >
-                    {mole?.percentage}%
+                    {mole?.percentage}
                   </UIText>
                 )}
               </View>
@@ -110,17 +199,31 @@ const Details = ({ navigation, route }: Props) => {
               <View
                 style={{ paddingHorizontal: 20, gap: 30, marginBottom: 20 }}
               >
-                <UIInput
-                  placeholder="Nombre (Localizacion)"
-                  styleInput={[styles.input, { borderColor: colors.grey }]}
-                  onChangeText={(text) => console.log(text)}
-                  placeholderTextColor={colors.grey}
+                <Controller
+                  control={control}
+                  name="name"
+                  render={({ field }) => (
+                    <UIInput
+                      placeholder="Nombre (Localizacion)"
+                      styleInput={[styles.input, { borderColor: colors.grey }]}
+                      onChangeText={field.onChange}
+                      value={field.value}
+                      placeholderTextColor={colors.grey}
+                    />
+                  )}
                 />
-                <UIInput
-                  placeholder="Breve descripcion"
-                  styleInput={[styles.input, { borderColor: colors.grey }]}
-                  onChangeText={(text) => console.log(text)}
-                  placeholderTextColor={colors.grey}
+                <Controller
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <UIInput
+                      placeholder="Breve descripcion"
+                      styleInput={[styles.input, { borderColor: colors.grey }]}
+                      onChangeText={field.onChange}
+                      value={field.value}
+                      placeholderTextColor={colors.grey}
+                    />
+                  )}
                 />
               </View>
             )}
@@ -131,12 +234,15 @@ const Details = ({ navigation, route }: Props) => {
           <View style={styles.containerButton}>
             <UIButton
               colorText={colors.white}
-              onPress={() => {}}
+              onPress={handleSubmit(onSubmit)}
               colorButton={colors.primary}
             >
               GUARDAR Y VERIFICAR CON IA
             </UIButton>
-            <UIButton colorText={colors.black} onPress={() => {}}>
+            <UIButton
+              colorText={colors.black}
+              onPress={handleSubmit(onSubmitMole)}
+            >
               GUARDAR Y NO VERIFICAR CON IA
             </UIButton>
           </View>
@@ -152,14 +258,14 @@ const Details = ({ navigation, route }: Props) => {
             </UIButton>
           </View>
         )}
-      </View>
+      </ScrollView>
     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 30,
     marginTop: 12,
   },

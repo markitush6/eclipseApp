@@ -10,7 +10,5 @@ export type RegisterPayload = {
 };
 
 export type LoginResponse = {
-  data: {
-    user_id: number;
-  };
+  user_id: number;
 };

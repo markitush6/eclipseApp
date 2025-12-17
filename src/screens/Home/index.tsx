@@ -1,5 +1,6 @@
 import Card from "@components/ui/card";
 import Header from "@components/ui/header";
+import UIText from "@components/ui/UIText";
 import useColors from "@hooks/hook.color";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -64,29 +65,37 @@ const Home = ({ navigation }: Props) => {
         />
       </View>
       <View style={styles.container}>
-        <Text style={styles.text}>MIS LUNARES</Text>
-        <FlatList
-          data={data?.historial}
-          renderItem={({ item }) => (
-            <Card
-              title={item?.nombre}
-              image={{ uri: item?.imagen }}
-              style={{ marginVertical: 16 }}
-              onPress={() =>
-                navigation.navigate("DetailsScreen", {
-                  mole: {
-                    name: item?.nombre,
-                    image: { uri: item?.imagen },
-                    description: item?.descripcion,
-                    percentage: item?.probabilidad,
-                    id: item?.lunar_id,
-                    user_id: userId,
-                  },
-                })
-              }
+        {!!data && data?.historial.length > 0 ? (
+          <>
+            <Text style={styles.text}>MIS LUNARES</Text>
+            <FlatList
+              data={data?.historial}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <Card
+                  title={item?.nombre}
+                  image={{ uri: item?.imagen }}
+                  style={{ marginVertical: 16 }}
+                  onPress={() =>
+                    navigation.navigate("DetailsScreen", {
+                      mole: {
+                        name: item?.nombre,
+                        image: { uri: item?.imagen },
+                        description: item?.descripcion,
+                        percentage: item?.probabilidad,
+                        id: item?.lunar_id,
+                        resultado: item?.resultado,
+                        user_id: userId,
+                      },
+                    })
+                  }
+                />
+              )}
             />
-          )}
-        />
+          </>
+        ) : (
+          <UIText style={styles.text}>No hay lunares</UIText>
+        )}
       </View>
     </>
   );

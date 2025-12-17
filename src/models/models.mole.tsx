@@ -7,6 +7,8 @@ export type MoleModel = {
   image: ImageSource;
   description: string;
   percentage?: number;
+  descripcion_resultado?: string;
+  resultado?: string;
 };
 export type HistoryModel = {
   historial: {

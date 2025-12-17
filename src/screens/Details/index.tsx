@@ -72,8 +72,8 @@ const Details = ({ navigation, route }: Props) => {
 
       const formData = new FormData();
       const fileName = `mole_${userId}_${Date.now()}.jpg`;
-      formData.append("name", formMole?.name ?? "");
-      formData.append("description", formMole?.description ?? "");
+      formData.append("nom", formMole?.name ?? "");
+      formData.append("descripcio", formMole?.description ?? "");
       formData.append("image", {
         uri: image,
         type: "image/jpeg",
@@ -82,14 +82,21 @@ const Details = ({ navigation, route }: Props) => {
       formData.append("user_id", userId.toString());
       if (!!image) {
         console.log(">Entra 2");
-
-        const response = await postMoleIA(formData);
-        console.log(response);
-        await refetch();
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "HomeScreen" }],
-        });
+        try {
+          const response = await postMoleIA(formData).unwrap();
+          if (response?.error?.status === 400) {
+            Alert.alert("Error", response?.error?.data?.error);
+          } else {
+            await refetch();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "HomeScreen" }],
+            });
+          }
+        } catch (error) {
+          console.log("Error!!!!", error);
+          Alert.alert("Error", error.data.error);
+        }
       } else {
         Alert.alert("Error", "No se selecciono una imagen");
       }
@@ -105,36 +112,6 @@ const Details = ({ navigation, route }: Props) => {
     };
     dataUserId();
   }, []);
-  const onSubmitMole = useCallback(
-    async (formMole: MoleModel) => {
-      console.log("Entra", image, formMole);
-
-      const formData = new FormData();
-      const fileName = `mole_${userId}_${Date.now()}.jpg`;
-      formData.append("nom", formMole?.name ?? "");
-      formData.append("descripcio", formMole?.description ?? "");
-      formData.append("image", {
-        uri: image,
-        type: "image/jpeg",
-        name: fileName,
-      });
-      formData.append("user_id", userId.toString());
-      if (!!image) {
-        console.log(">Entra 2");
-
-        const response = await postMole(formData);
-        console.log(response);
-        await refetch();
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "HomeScreen" }],
-        });
-      } else {
-        Alert.alert("Error", "No se selecciono una imagen");
-      }
-    },
-    [image, userId]
-  );
 
   return (
     <>
@@ -180,19 +157,26 @@ const Details = ({ navigation, route }: Props) => {
           <View style={styles.containerText}>
             {!!mole ? (
               <View style={{ alignItems: "center", gap: 40 }}>
+                {!!mole.name && (
+                  <UIText style={styles.text}>{mole?.name}</UIText>
+                )}
                 {!!mole.description && (
                   <UIText style={styles.text}>{mole?.description}</UIText>
                 )}
-                <UIText style={styles.text}>{mole?.name}</UIText>
-                {!!mole?.percentage && (
+                {!!mole.resultado && (
                   <UIText
                     style={styles.text}
                     color={
-                      mole?.percentage < 50 ? colors.primary : colors.danger
+                      mole?.resultado === "BENIGNO"
+                        ? colors.primary
+                        : colors.danger
                     }
                   >
-                    {mole?.percentage}
+                    {mole?.resultado}
                   </UIText>
+                )}
+                {!!mole?.percentage && (
+                  <UIText style={styles.text}>{mole?.percentage}</UIText>
                 )}
               </View>
             ) : (
@@ -238,23 +222,6 @@ const Details = ({ navigation, route }: Props) => {
               colorButton={colors.primary}
             >
               GUARDAR Y VERIFICAR CON IA
-            </UIButton>
-            <UIButton
-              colorText={colors.black}
-              onPress={handleSubmit(onSubmitMole)}
-            >
-              GUARDAR Y NO VERIFICAR CON IA
-            </UIButton>
-          </View>
-        )}
-        {!!mole && !mole?.percentage && (
-          <View style={styles.containerButton}>
-            <UIButton
-              colorText={colors.white}
-              onPress={() => {}}
-              colorButton={colors.primary}
-            >
-              VERIFICAR CON IA
             </UIButton>
           </View>
         )}

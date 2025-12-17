@@ -24,16 +24,18 @@ const Register = ({ navigation }: Props) => {
     formState: { errors },
   } = useForm<RegisterPayload>();
   const onSubmit = async (data: RegisterPayload) => {
+    console.log(data);
+
     try {
-      const response = await registerMutation(data);
+      const response = await registerMutation(data).unwrap();
       console.log(response);
-      await AsyncStorage.setItem("user_id", response.data?.user_id?.toString());
+      await AsyncStorage.setItem("user_id", response.user_id?.toString());
       navigation.reset({
         index: 0,
         routes: [{ name: "HomeScreen" }],
       });
     } catch (error) {
-      console.log(error);
+      console.log("Errrroooooor!!!!!!", error);
       setError("email", {
         type: "manual",
         message: "El correo electronico ya esta en uso",

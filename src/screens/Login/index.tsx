@@ -26,12 +26,9 @@ const Login = ({ navigation }: Props) => {
   const onSubmit = useCallback(
     async (data: LoginPayload) => {
       try {
-        const response = await loginData(data);
+        const response = await loginData(data).unwrap();
         console.log(response);
-        await AsyncStorage.setItem(
-          "user_id",
-          response.data?.user_id?.toString()
-        );
+        await AsyncStorage.setItem("user_id", response.user_id?.toString());
         navigation.reset({
           index: 0,
           routes: [{ name: "HomeScreen" }],

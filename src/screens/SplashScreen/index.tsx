@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useEffect } from "react";
@@ -8,8 +9,15 @@ type Props = NativeStackScreenProps<RootParamList, "SplashScreen">;
 
 const SplashScreen = ({ navigation }: Props) => {
   useEffect(() => {
-    setTimeout(() => {
-      navigation.navigate("LoginScreen");
+    setTimeout(async () => {
+      const idUser = await AsyncStorage.getItem("user_id");
+      console.log("splash", idUser);
+
+      if (idUser) {
+        navigation.navigate("HomeScreen");
+      } else {
+        navigation.navigate("LoginScreen");
+      }
     }, 3000);
   }, []);
   return (

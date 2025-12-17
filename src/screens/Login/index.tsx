@@ -3,7 +3,9 @@ import UIButton from "@components/ui/UIButton";
 import UIText from "@components/ui/UIText";
 import useColors from "@hooks/hook.color";
 import { LoginPayload } from "@models/model.auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useLoginMutation } from "@redux/service/apiAuth";
 import { RootParamList } from "@screens/root";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -14,12 +16,38 @@ type Props = NativeStackScreenProps<RootParamList, "RegisterScreen">;
 const Login = ({ navigation }: Props) => {
   const colors = useColors();
   const [inputFocus, setInputFocus] = useState<number>(0);
-  const { control, handleSubmit } = useForm<LoginPayload>();
-  const onSubmit = useCallback((data: LoginPayload) => {
-    console.log("hola", data);
-  }, []);
+  const [loginData] = useLoginMutation();
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<LoginPayload>();
+  const onSubmit = useCallback(
+    async (data: LoginPayload) => {
+      try {
+        const response = await loginData(data);
+        console.log(response);
+        await AsyncStorage.setItem(
+          "user_id",
+          response.data?.user_id?.toString()
+        );
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "HomeScreen" }],
+        });
+      } catch (error) {
+        console.log(error);
+        setError("email", {
+          type: "manual",
+          message: "Correo electronico o contraseña incorrectos",
+        });
+      }
+    },
+    [loginData]
+  );
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container]}>
       <View style={[styles.form, { backgroundColor: colors.secondary }]}>
         <Image
           source={require("@assets/images/logo.png")}
@@ -44,7 +72,6 @@ const Login = ({ navigation }: Props) => {
                   },
                 ]}
                 onChangeText={field.onChange}
-                onFocus={() => setInputFocus(1)}
                 onBlur={() => setInputFocus(0)}
                 value={field.value}
               />
@@ -54,25 +81,30 @@ const Login = ({ navigation }: Props) => {
             control={control}
             name="password"
             render={({ field }) => (
-              <UIInput
-                placeholder="Password"
-                autoCapitalize="none"
-                secureTextEntry
-                placeholderTextColor={
-                  inputFocus === 2 ? colors.primary : colors.grey
-                }
-                onFocus={() => setInputFocus(2)}
-                onBlur={() => setInputFocus(0)}
-                styleInput={[
-                  styles.input,
-                  {
-                    borderColor:
-                      inputFocus === 2 ? colors.primary : colors.grey,
-                  },
-                ]}
-                onChangeText={field.onChange}
-                value={field.value}
-              />
+              <View>
+                <UIInput
+                  placeholder="Password"
+                  autoCapitalize="none"
+                  secureTextEntry
+                  placeholderTextColor={
+                    inputFocus === 2 ? colors.primary : colors.grey
+                  }
+                  onFocus={() => setInputFocus(2)}
+                  onBlur={() => setInputFocus(0)}
+                  styleInput={[
+                    styles.input,
+                    {
+                      borderColor:
+                        inputFocus === 2 ? colors.primary : colors.grey,
+                    },
+                  ]}
+                  onChangeText={field.onChange}
+                  value={field.value}
+                />
+                <UIText style={{ fontSize: 12 }} color={colors.danger}>
+                  {errors.email?.message}
+                </UIText>
+              </View>
             )}
           />
         </View>

@@ -3,21 +3,50 @@ import UIButton from "@components/ui/UIButton";
 import UIText from "@components/ui/UIText";
 import useColors from "@hooks/hook.color";
 import { RegisterPayload } from "@models/model.auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useRegisterMutation } from "@redux/service/apiAuth";
 import { RootParamList } from "@screens/root";
 import { Controller, useForm } from "react-hook-form";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<RootParamList, "RegisterScreen">;
 
 const Register = ({ navigation }: Props) => {
   const colors = useColors();
-  const { control, handleSubmit } = useForm<RegisterPayload>();
-  const onSubmit = (data: RegisterPayload) => {
-    console.log("hola", data);
+  const insets = useSafeAreaInsets();
+  const [registerMutation] = useRegisterMutation();
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<RegisterPayload>();
+  const onSubmit = async (data: RegisterPayload) => {
+    try {
+      const response = await registerMutation(data);
+      console.log(response);
+      await AsyncStorage.setItem("user_id", response.data?.user_id?.toString());
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
+      });
+    } catch (error) {
+      console.log(error);
+      setError("email", {
+        type: "manual",
+        message: "El correo electronico ya esta en uso",
+      });
+    }
   };
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { paddingTop: insets.top, paddingBottom: insets.bottom },
+      ]}
+    >
       <View style={[styles.form, { backgroundColor: colors.secondary }]}>
         <Image
           source={require("@assets/images/logo.png")}
@@ -26,10 +55,10 @@ const Register = ({ navigation }: Props) => {
         <View style={styles.inputContainer}>
           <Controller
             control={control}
-            name="name"
+            name="username"
             render={({ field }) => (
               <UIInput
-                placeholder="Name"
+                placeholder="Username"
                 autoCapitalize="none"
                 placeholderTextColor={colors.grey}
                 styleInput={[styles.input, { borderColor: colors.grey }]}
@@ -58,16 +87,21 @@ const Register = ({ navigation }: Props) => {
             control={control}
             name="password"
             render={({ field }) => (
-              <UIInput
-                placeholder="Password"
-                autoCapitalize="none"
-                secureTextEntry
-                placeholderTextColor={colors.grey}
-                styleInput={[styles.input, { borderColor: colors.grey }]}
-                onChangeText={field.onChange}
-                value={field.value}
-                {...field}
-              />
+              <View>
+                <UIInput
+                  placeholder="Password"
+                  autoCapitalize="none"
+                  secureTextEntry
+                  placeholderTextColor={colors.grey}
+                  styleInput={[styles.input, { borderColor: colors.grey }]}
+                  onChangeText={field.onChange}
+                  value={field.value}
+                  {...field}
+                />
+                <UIText style={{ fontSize: 12 }} color={colors.danger}>
+                  {errors.email?.message}
+                </UIText>
+              </View>
             )}
           />
         </View>

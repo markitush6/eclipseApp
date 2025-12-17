@@ -141,7 +141,7 @@ const Details = ({ navigation, route }: Props) => {
             </UIButton>
           </View>
         )}
-        {!mole?.percentage && (
+        {!!mole && !mole?.percentage && (
           <View style={styles.containerButton}>
             <UIButton
               colorText={colors.white}

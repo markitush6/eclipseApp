@@ -10,7 +10,8 @@
       "@navigation/*": ["src/navigation/*"],
       "@models/*": ["src/models/*"],
       "@theme/*": ["src/theme/*"],
-      "@redux/*": ["src/redux/*"]
+      "@redux/*": ["src/redux/*"],
+      "@const/*": ["src/const/*"]
     }
   },
   "extends": "expo/tsconfig.base",

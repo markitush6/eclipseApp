@@ -1,6 +1,7 @@
 import Card from "@components/ui/card";
 import Header from "@components/ui/header";
 import useColors from "@hooks/hook.color";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useGetMoleQuery } from "@redux/service/apiMole";
 import { RootParamList } from "@screens/root";
@@ -23,7 +24,15 @@ const Home = ({ navigation }: Props) => {
         <Header
           backgroundColor={colors.secondary}
           renderLeft={() => (
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                await AsyncStorage.removeItem("user_id");
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: "LoginScreen" }],
+                });
+              }}
+            >
               <Icon name="user" size={30} color={colors.grey} />
             </TouchableOpacity>
           )}

@@ -4,7 +4,13 @@ export type LoginPayload = {
 };
 
 export type RegisterPayload = {
-  name: string;
+  username: string;
   email: string;
   password: string;
+};
+
+export type LoginResponse = {
+  data: {
+    user_id: number;
+  };
 };
